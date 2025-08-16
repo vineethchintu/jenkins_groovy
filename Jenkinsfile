@@ -1,39 +1,71 @@
 pipeline {
     agent any
+    
+    environment {
+        APP_ENV = "staging"
+        VERSION = "1.0.${BUILD_NUMBER}"
+    }
+
+    parameters {
+        string(name: 'BRANCH', defaultValue: 'main', description: 'Branch to build')
+        booleanParam(name: 'DEPLOY', defaultValue: false, description: 'Deploy after build?')
+    }
 
     stages {
-        stage('Checkout') {
+        stage('Clone') {
             steps {
-                git branch: 'main', url: 'https://github.com/vineethvattiakula/jenkins_groovy.git'
+                git branch: "${params.BRANCH}", url: 'https://github.com/vineethvattiakula/jenkins_groovy.git'
             }
         }
 
         stage('Build') {
             steps {
-                sh 'mvn clean package'
+                script {
+                    if (isUnix()) {
+                        sh './build.sh'
+                    } else {
+                        bat 'build.bat'
+                    }
+                }
             }
         }
 
         stage('Test') {
             steps {
-                sh 'mvn test'
+                sh './test.sh'
+            }
+        }
+
+        stage('Approval') {
+            when {
+                expression { params.DEPLOY }
+            }
+            steps {
+                input message: "Deploy to ${APP_ENV}?", ok: "Deploy Now"
             }
         }
 
         stage('Deploy') {
+            when {
+                expression { params.DEPLOY }
+            }
             steps {
-                sh './deploy.sh'
+                echo "Deploying version ${VERSION} to ${APP_ENV}"
             }
         }
     }
 
     post {
         success {
-            echo 'Pipeline completed successfully!'
+            echo "✅ Pipeline finished successfully"
         }
         failure {
-            echo 'Pipeline failed. Please check logs.'
+            echo "❌ Pipeline failed"
+        }
+        always {
+            echo "🔔 Always runs"
         }
     }
 }
+
 
