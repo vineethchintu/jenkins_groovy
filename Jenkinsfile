@@ -32,7 +32,13 @@ pipeline {
 
         stage('Test') {
             steps {
-                sh './test.sh'
+                script {
+                    if (isUnix()) {
+                        sh './test.sh'
+                    } else {
+                        bat 'test.bat'
+                    }
+                }
             }
         }
 
