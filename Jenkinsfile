@@ -1,6 +1,6 @@
 pipeline {
     agent any
-    
+
     environment {
         APP_ENV = "staging"
         VERSION = "1.0.${BUILD_NUMBER}"
@@ -36,22 +36,16 @@ pipeline {
             }
         }
 
-        stage('Approval') {
+        stage('Approval & Deploy') {
             when {
                 expression { params.DEPLOY }
             }
             steps {
-                input message: "Deploy to ${APP_ENV}?", ok: "Deploy Now"
-            }
-        }
-
-        stage('Approval') {
-            when {
-                expression { params.DEPLOY }
-            }
-            steps {
-                sh './deploy.sh'
-                echo "Deploying version ${VERSION} to ${APP_ENV}"
+                script {
+                    input message: "Deploy to ${APP_ENV}?", ok: "Deploy Now"
+                    sh './deploy.sh'
+                    echo "Deploying version ${VERSION} to ${APP_ENV}"
+                }
             }
         }
     }
