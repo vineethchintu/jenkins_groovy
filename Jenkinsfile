@@ -4,7 +4,6 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                // Checkout code from GitHub
                 git url: 'https://github.com/vineethchintu/jenkins_groovy.git', branch: 'main'
             }
         }
@@ -12,14 +11,20 @@ pipeline {
         stage('Build') {
             steps {
                 echo "🚧 Starting Build..."
-                sh './build.sh'
+                sh '''
+                  chmod +x build.sh test.sh deploy.sh
+                  ./build.sh
+                '''
             }
         }
 
         stage('Test') {
             steps {
                 echo "🧪 Running Tests..."
-                sh './test.sh'
+                sh '''
+                  chmod +x build.sh test.sh deploy.sh
+                  ./test.sh
+                '''
             }
         }
 
@@ -30,7 +35,10 @@ pipeline {
                         input message: "Deploy to Production?", ok: "Deploy"
                     }
                     echo "🚀 Deploying..."
-                    sh './deploy.sh'
+                    sh '''
+                      chmod +x build.sh test.sh deploy.sh
+                      ./deploy.sh
+                    '''
                 }
             }
         }
@@ -48,4 +56,5 @@ pipeline {
         }
     }
 }
+
 
