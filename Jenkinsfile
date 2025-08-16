@@ -14,7 +14,7 @@ pipeline {
     stages {
         stage('Clone') {
             steps {
-                git branch: "${params.BRANCH}", url: 'https://github.com/vineethvattiakula/jenkins_groovy.git'
+                git branch: "${params.BRANCH}", url: 'https://github.com/vineethchintu/jenkins_groovy.git'
             }
         }
 
